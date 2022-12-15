@@ -28,6 +28,8 @@ let parseRangePair = (rangePair) => {
     return [start1, end1, start2, end2];
 };
 
+// PART 1
+
 // count how many pairs have one range fully contained within the other
 let checkContaining = ([start1, end1, start2, end2]) =>
     (start1 >= start2 && end1 <= end2) || (start1 <= start2 && end1 >= end2);
@@ -37,6 +39,15 @@ let coordinates = ranges.map(parseRangePair);
 let containing = coordinates.filter(checkContaining);
 let containingCount = containing.length;
 
-console.log(containingCount)
+// PART 2
+
+let checkOverlapping = ([start1, end1, start2, end2]) =>
+    (start1 <= end2 && start2 <= end1);
+
+let overlapping = coordinates.filter(checkOverlapping);
+let overlappingCount = overlapping.length;
+
+console.log(overlappingCount)
 
 // part 1 outputs 441
+// part 2 outputs 861
