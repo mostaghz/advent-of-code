@@ -27,7 +27,10 @@ let arrayEquals = (arr1, arr2) =>
 
 let modifyTree = (tree, newKey, newVal, destination, path = []) => {
     let newTree = Object.entries(tree).reduce((newTree, [key, value]) => {
-        let nextValue = typeof value === "object" ? modifyTree(value, newKey, newVal, destination, [...path, key]) : value;
+        let nextValue =
+            typeof value === "object"
+                ? modifyTree(value, newKey, newVal, destination, [...path, key])
+                : value;
         return {...newTree, [key]: nextValue };
     }, {});
 
@@ -36,28 +39,52 @@ let modifyTree = (tree, newKey, newVal, destination, path = []) => {
         : newTree;
 };
 
-let fileTree = {
-    a : {
-        f: 29116,
-        g: 2557,
-        "h.lst": 62596,
+let lines = sampleInput.split("\n");
+
+let fileTree = lines.reduce(
+    ({tree, location}, line) => {
+    let doNothing = () => ({tree, location});
+
+    let closeDirectory = () => ({tree, location: location.slice(0, -1)});
+
+    let goToHomeDirectory = () => ({tree, location: []});
+
+    let openDirectory = (line) => {
+        let dir = line.match(/\$ cd (\w+)/)[1];
+        return {tree, location: [...location, dir]};
+    };
+
+    let createDirectory = (line) => {
+        let dir = line.match(/dir (\w+)/)[1];
+        let nextTree = modifyTree(tree, dir, {}, location);
+        return {tree: nextTree, location};
+    };
+
+    let createFile = (line) => {
+        let [size, file] = line.match(/(\d+) (.+)/).slice(1);
+        let nextTree = modifyTree(tree, file, Number(size), location);
+        return {tree: nextTree, location};
+    };
+
+    let commandMap = [
+        { expression: /\$ ls/, function: doNothing },
+        { expression: /\$ cd \.\./, function: closeDirectory },
+        { expression: /\$ cd\//, function: goToHomeDirectory },
+        { expression: /\$ cd \w+/, function: openDirectory },
+        { expression: /dir \w+/, function: createDirectory },
+        { expression: /\d+ .+/, function: createFile },
+    ];
+
+    let command = commandMap.find(({expression}) =>
+        expression.test(line)
+    ).function;
+
+    return command(line);
     },
-    "b.txt": 14848514,
-    "c.dat": 8504156,
-    d: {
-        j: 4060174,
-        "d.log": 8033020,
-        "d.ext": 5626152,
-        k: 7214296,
-    },
-};
+    { tree: {}, location: [] }
+).tree;
 
-let tree2 = modifyTree(fileTree, "e", {}, ["a"]);
-console.log(tree2)
-
-let tree3 = modifyTree(tree2, "i", 584, ["a", "e"]);
-console.log(tree3)
-
+console.log(fileTree)
 
 // create a tree of the file system (nested objects)
 
