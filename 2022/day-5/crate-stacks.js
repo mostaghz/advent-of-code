@@ -50,6 +50,15 @@ let moveCrates = (stacks, amount, from, to) =>
         : stack
     );
 
+let multiMoveCrates = (stacks, amount, from, to) =>
+    stacks.map((stack, i) =>
+        i === from - 1
+            ? stack.slice(amount)
+            : i === to - 1
+                ? stacks[from - 1].slice(0, amount) + stack
+                : stack
+    );
+
 // parse list of instructions and execute them
 let convertInstruction = (instructionStr) => {
     let [amount, from, to] = instructionStr
@@ -61,6 +70,7 @@ let convertInstruction = (instructionStr) => {
 
 let instructions = instructionsPart.split("\n").map(convertInstruction);
 
+// PART 1
 let finalStacks = instructions.reduce(
     (stacks, [amount, from, to]) => moveCrates(stacks, amount, from, to),
     initialStacks
@@ -68,6 +78,15 @@ let finalStacks = instructions.reduce(
 
 let stackTops = finalStacks.map((stack) => stack[0]).join("");
 
-console.log(stackTops)
+// PART 2 (literally the same as part one just without the reverse from 49)
+let finalStacks2 = instructions.reduce(
+    (stacks, [amount, from, to]) => multiMoveCrates(stacks, amount, from, to),
+    initialStacks
+);
+
+let stackTops2 = finalStacks2.map((stack) => stack[0]).join("");
+
+console.log(stackTops2)
 
 // part 1 outputs TLFGBZHCN
+// part 2 outputs QRQFHFWCL
